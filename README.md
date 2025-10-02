@@ -1,16 +1,60 @@
-# rag_project
+# RAG Project
+A Retrieval-Augmented Generation (RAG) application that combines web search, document ranking, and LLM responses into a chat interface. The project has two parts:
 
-A new Flutter project.
+* **Backend (Python, FastAPI/WebSocket)** → Search, filter, and rank documents, then use an LLM (Gemini) for responses.
+* **Frontend (Flutter)** → Interactive UI for querying, showing answers, sources, and chat history.
 
-## Getting Started
+## Features
+### Backend (Python)
+#### Search Service (search_service.py)
 
-This project is a starting point for a Flutter application.
+* Uses Tavily API to fetch search results
+* Extracts main content from webpages using Trafilatura
+* Supports max_results parameter for controlling results
 
-A few resources to get you started if this is your first Flutter project:
+#### Resource Sorting (sortResources_service.py)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+* Converts query and documents into embeddings
+* Calculates cosine similarity to rank results by relevance
+* Adds relevance_score to results and sorts them
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#### LLM Service (llm_service.py)
+
+* Connects to Google Gemini API
+* Creates a context from retrieved documents
+* Streams responses chunk by chunk via WebSocket
+
+#### WebSocket API (main.py)
+
+* Endpoint: /ws/chat
+* Accepts query requests
+* Streams real-time LLM responses (type: content)
+* Sends completion and error messages (type: complete / type: error)
+
+
+#### Models (chat_body.py)
+
+Pydantic models for request/response validation
+
+### Frontend (Flutter)
+#### UI Screens
+
+chat_page.dart → Main chat interface
+rag_screen.dart → Display RAG results
+
+#### Widgets
+
+**answer.widget.dart** → Displays streamed LLM answers
+**sources.widget.dart** → Shows ranked sources with title + URL
+**search.widget.dart + searchButtons.widget.dart** → Search UI components
+**sideBar.widget.dart + sideBarButtons.widget.dart** → Sidebar navigation
+
+#### Constants
+
+**colors.dart** → Centralized theme & color palette
+
+## Tech Stack
+
+* **Backend**: Python, FastAPI, WebSocket, Tavily API, Trafilatura, NumPy, Google Generative AI
+* **Frontend**: Flutter (Dart)
+* **Other**: Pydantic, dotenv for config management
